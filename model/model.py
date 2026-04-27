@@ -23,7 +23,10 @@ class Model:
 
     #siccome quesTO addedges è lento penso a un altra soluzione
     def addedges2(self):
-
+        for u in self._fermate:
+            for v in DAO.getvicini(u): #trovo l'elenco dei vicini del nodo
+                self._grafo.add_edge(u, v) #se non ha vicini v sarà vuoto?
+                
 
     def get_numnodi(self):
         return len(self._grafo.nodes())
