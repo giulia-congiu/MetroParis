@@ -1,4 +1,5 @@
 from database.DB_connect import DBConnect
+from model.connessione import Connessione
 from model.fermata import Fermata
 
 
@@ -37,7 +38,7 @@ class DAO():
         return len(result) > 0 #se la len è > 0 avrò true altrimenti false
 
     @staticmethod
-    def getvicini(u):
+    def getvicini(u): #restituisco una connessione!
         #seleziona tutti i vicini della fermata u passata
         conn = DBConnect.get_connection()
 
@@ -48,7 +49,23 @@ class DAO():
         cursor.execute(query, (u.id_fermata,))
 
         for row in cursor:
-            result.append(Fermata(**row))
+            result.append(Connessione(**row)) #INVECE di caricare le cose nella fermata le carico nella connessione
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
+    def getAllEdges():
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT * FROM connessione c"
+        cursor.execute(query)
+
+        for row in cursor:
+            result.append(Connessione(**row))
         cursor.close()
         conn.close()
         return result
