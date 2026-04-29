@@ -7,21 +7,40 @@ class Controller:
         self._view = view
         # the model, which implements the logic of the program and holds the data
         self._model = model
+        self._fermataPartenza = None
 
     def handleCreaGrafo(self,e):
-        pass
+        #metodo chiamato dal pulsante
+        self._model.buildGraph() #crea una nuova istanza del grafo
+        self._view.lst_result.controls.clear()
+        self._view.lst_result.controls.append(ft.Text("Grafo correttamente creato."))
+        self._view.lst_result.controls.append(ft.Text(f"Il grafo è costituito da {self._model.get_numnodi()} nodi"))
+        self._view.lst_result.controls.append(ft.Text(f"Il grafo è costituito da {self._model.get_numarchi()} archi "))
+        self._view.update_page()
 
     def handleCercaRaggiungibili(self,e):
-        pass
+        if self._fermataPartenza is None:
+            self._view.lst_result.controls.clear()
+            self._view.lst_result.controls.append(ft.Text("Non è stata scelta la stazione di partenza.", color="red"))
+            self._view.update_page()
+            return
+        #se arrivo qui l'utente ha scelto il nodo di partenza
+        nodes = self._model.getBFSNodesFromEdges(self._fermataPartenza)
+        self._view.lst_result.controls.clear()
+        self._view.lst_result.controls.append(ft.Text(f"di seguito i nodi raggiungibili da {self._fermataPartenza}:"))
+        self._view.update_page()
+        #????????????????????????'
 
     def loadFermate(self, dd: ft.Dropdown()):
+        #riempie due dropdown con le fermate
         fermate = self._model.fermate
 
         if dd.label == "Stazione di Partenza":
             for f in fermate:
-                dd.options.append(ft.dropdown.Option(text=f.nome,
-                                                     data=f,
+                dd.options.append(ft.dropdown.Option(text=f.nome, #qui va una rappresentazione a stringa dell'ogg
+                                                     data=f, #qui va specificato l'oggetto stesso
                                                      on_click=self.read_DD_Partenza))
+                                                    #onclick è la funzione chiamata quando clicco su quel campo
         elif dd.label == "Stazione di Arrivo":
             for f in fermate:
                 dd.options.append(ft.dropdown.Option(text=f.nome,

@@ -22,7 +22,7 @@ class DAO():
         return result
 
     @staticmethod
-    def hasconn(u: Fermata, v: Fermata) -> bool: #mi aspetto ogetti di tipo fermata e un bool come ritorno
+    def hasconn(u: Fermata, v: Fermata) -> bool: #mi aspetto oggetti di tipo fermata e un bool come ritorno
         conn = DBConnect.get_connection()
 
         result = []
