@@ -16,6 +16,54 @@ class Model:
             #dato l'id della fermata (chiave primaria della dataclasss (uso quasi sempre quellA)),
             # ritorno l'oggetto fermata corrispondente
 
+    '''VERSIONE 2 CON GRAFO PESATO PER TENER CONTO DEI PERCORSI DOPPI'''
+    def buildGraphPesato(self):
+        self._grafo.clear()
+        self._grafo.add_nodes_from(self._fermate)
+        self.addEdgesPesati() #Cambia solo come vado ad aggiungere gli archi
+
+    def addEdgesPesati(self):
+        # versione 1: riutilizzare il principio di funzionamento del metodo addEdges3,
+        # ma contando quante volte provo ad aggiungere l'arco
+        self._grafo.clear_edges()
+        alledges = DAO.getAllEdges()
+        for conn in alledges:
+            u = self._idMapFermate[conn.id_stazP]
+            v = self._idMapFermate[conn.id_stazA]
+
+            if self._grafo.has_edge(u, v):
+                self._grafo[u][v]["weight"] += 1 #sfrutto il fatto che il grafo sia un dict
+            else:
+                self._grafo.add_edge(u, v, weight=1)
+
+    def addEdgesPesatiV2(self):
+        # Delega il calcolo del peso alla query sql nel dao, per semplificarci la vita in python
+        #pensa sempre se è meglio complicare la query  e semplificare python o viceversa
+        self._grafo.clear_edges()
+        allEdgesWPeso = DAO.getAllEdgesPesati()
+        # LISTA di tuple = [(id_stazP, id_stazA, peso), ..]
+
+        for e in allEdgesWPeso:
+            u = self._idMapFermate[e[0]]
+            v = self._idMapFermate[e[1]]
+            peso = e[2]
+
+            self._grafo.add_edge(u, v, weight=peso)
+
+    def getArchiPesoMaggiore(self):
+        #mi rida gli archi che hanno peso maggiogiore di 1
+        #ovvero qle fermate collegate da più di 1 percorso
+        edges = self._grafo.edges(data=True) #edges è un metodo di grafo che riceve data
+        #data = true vuol dire che in edges mi salverò tutti gli archi con tutti i loro attributi compreso il loro peso
+        #se data = false in edeges salva tutti gli archi ma SENZA GLI ATTRIBUTI, quindi senza peso
+
+        edgesMaggiori = [] #seleziono quello con peso > 1
+        for e in edges:
+            if self._grafo.get_edge_data(e[0], e[1])["weight"] > 1: #gli passo un arco come coppia di nodi e chiedo l'attributo
+                # self._grafo[e[0]][e[1]]["weight"]
+                edgesMaggiori.append(e)
+        return edgesMaggiori
+
     '''4 ESPLORAZIONI DEL GRAFO UGUALI A COPPIE, CAMBIA SOLO IL MODO IN CUI MI VIENE RIDATO L'OUTPUT
     IN UN CASO VIENE RESTITUITO a RAPPR A ARCHI IN UNO A RAPPR AD ALBERO'''
 
@@ -48,7 +96,7 @@ class Model:
 
     def buildGraph(self):
         #voglio popolare il grafo con la lista di oggetti (fermate).
-        #voglio quindi aggiungere nodi e archi
+        #voglio quindi aggiungere nodi (le fermate) e archi (collegamenti tra fermate)
         #è bene assicurarsi che all'inizio il grafo sia vuoto altrimenti aggiungo nodi a uno esistente
         self._grafo.clear()
         self._grafo.add_nodes_from(self._fermate)
@@ -91,8 +139,9 @@ class Model:
     '''posso fare ancora meglio di addedges2: posso pensare a un modo di costruire
     gli edge senza fare un ciclo for, ma solo leggendo la tabella connessioni: due nodi sono collegati
     solo se c'è una connessione tra loro, se leggo tutte le connessioni che ho nel dao ho fatto'''
-    def addedges3(self): #funzione che mi tira fuori tutti gli archi
-        #in questo caso posso aggiungerli tutti in altri casi devo fare dei controlli
+    def addedges3(self): #funzione che mi tira fuori tutti gli archi.
+        #in questo caso posso aggiungerli tutti in altri casi devo fare dei controlli.
+        #questa funzione vede gli archi e se non stanno nel grafo li aggiunge
         self._grafo.clear_edges()
         alledges = DAO.getAllEdges()
         for conn in alledges:

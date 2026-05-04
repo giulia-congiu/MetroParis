@@ -69,3 +69,25 @@ class DAO():
         cursor.close()
         conn.close()
         return result
+
+    @staticmethod
+    def getAllEdgesPesati():
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """SELECT id_stazP, id_stazA, count(*) as peso 
+                   FROM connessione c
+                   group by id_stazP, id_stazA
+                   order by peso desc"""
+        #conta le righe uguali per una coopia, ovvero quanti archi esistono da u a v
+        cursor.execute(query)
+
+        #creo semplicemente una lista di tuple (stazP, stazA, peso) invece che un oggetto che dovrei creare
+        for row in cursor:
+            result.append((row["id_stazP"], row["id_stazA"], row["peso"]))
+
+        cursor.close()
+        conn.close()
+        return result

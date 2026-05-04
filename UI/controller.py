@@ -28,8 +28,11 @@ class Controller:
         nodes = self._model.getBFSNodesFromEdges(self._fermataPartenza)
         self._view.lst_result.controls.clear()
         self._view.lst_result.controls.append(ft.Text(f"di seguito i nodi raggiungibili da {self._fermataPartenza}:"))
+        for n in nodes:
+            self._view.lst_result.controls.append(ft.Text(n))
         self._view.update_page()
-        #????????????????????????'
+
+
 
     def loadFermate(self, dd: ft.Dropdown()):
         #riempie due dropdown con le fermate
