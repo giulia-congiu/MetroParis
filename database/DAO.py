@@ -100,15 +100,15 @@ class DAO():
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select c.id_stazA , c.id_stazA , max(l.velocita) as veloc
+        query = """select c.id_stazA , c.id_stazA , max(l.velocita) as v
                     from connessione c, linea l
                     where l.id_linea = c.id_linea 
                     group by c.id_stazP , c.id_stazA 
-                    order by veloc asc"""
+                    order by v asc"""
         cursor.execute(query)
 
         for row in cursor:
-            result.append((row["id_stazP"], row["id_stazA"], row["veloc"]))
+            result.append((row["id_stazP"], row["id_stazA"], row["v"]))
 
         cursor.close()
         conn.close()

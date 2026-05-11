@@ -10,6 +10,37 @@ class Controller:
         self._fermataPartenza = None
         self._fermataArrivo = None
 
+    def handleTrovaPercorso(self, e):
+        if self._fermataPartenza is None or self._fermataArrivo is None:
+            self._view.lst_result.controls.clear()
+            self._view.lst_result.controls.append((ft.Text("Attenzione, necessario"
+                      "selezionare fermate di "
+                      "partenza ed arrivo.", color="red")))
+            self._view.update_page()
+            return
+
+        totTime, optPath = self._model.getShortestPath(self._fermataPartenza,
+                                                       self._fermataArrivo)
+        #può succedere che trovo un percorso o non lo trovo.
+
+        if optPath == []: #dijkstra mi ha ridato unA lista vuota se non esiste percorso da arrivo a partenza
+            self._view.lst_result.controls.clear()
+            self._view.lst_result.controls.append(ft.Text(f"Non ho trovato un cammino tra "
+                                                          f"{self._fermataPartenza} "
+                                                          f"e {self._fermataArrivo}", color="orange"))
+            return
+
+        self._view.lst_result.controls.clear()
+        self._view.lst_result.controls.append(ft.Text(f"Ho trovato un cammino "
+                                                      f"fra {self._fermataPartenza} e "
+                                                      f"{self._fermataArrivo} "
+                                                      f"che impiega {totTime} minuti",
+                                                      color= "green"))
+        self._view.lst_result.controls.append(ft.Text("Di seguito la lista di fermate:"))
+        for v in optPath:
+            self._view.lst_result.controls.append(ft.Text(v))
+        self._view.update_page()
+
     def handleCreaGrafo(self,e):
         #metodo chiamato dal pulsante
        # self._model.buildGraph() #crea una nuova istanza del grafo
@@ -34,30 +65,6 @@ class Controller:
             self._view.lst_result.controls.append(ft.Text(n))
         self._view.update_page()
 
-    def handleTrovaPercorso(self, e):
-        if self._fermataPartenza is None or self._fermataArrivo is None:
-            self._view.lst_result.controls.clear()
-            self._view.lst_result.controls.append((ft.Text("Attenzione, necesario"
-                      "selezionare fermate di "
-                      "partenza ed arrivo.", color="red")))
-            self._view.update_page()
-            return
-
-        totTime, optPath = self._model.getShortestPath(self._fermataPartenza, self._fermataArrivo)
-        #pùl succedere che trovo un percorso o non lo trovo.
-        if optPath == []: #dijkstra mi ha ridato unA lista vuota se non esiste percorso da arrivo a partenza
-            self._view.lst_result.controls.clear()
-            self._view.lst_result.controls.append(ft.Text(f"Non ho trovato un cammino tra "
-                                                          f"{self._fermataPartenza} "
-                                                          f"e {self._fermataArrivo}", color="orange"))
-            return
-
-        self._view.lst_result.controls.clear()
-        self._view.lst_result.controls.append(ft.Text(f"Ho trovato un cammino fra {self._fermataPartenza} e {self._fermataArrivo} che impiega {totTime} minuti", color= green))
-        self._view.lst_result.controls.append(ft.Text("Di seguito la lista di fermate:"))
-        for v in optPath:
-            self._view.lst_result.controls.append(ft.Text(v))
-        self._view.update_page()
 
     def loadFermate(self, dd: ft.Dropdown()):
         #riempie due dropdown con le fermate

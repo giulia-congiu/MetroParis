@@ -8,7 +8,7 @@ import geopy.distance
 def getPesoPercorrenza(u, v, vel):
     dist = geopy.distance.distance((u.coordX, u.coordY),
                                    (v.coordX, v.coordY)).km
-    #gli do due coordinate, inserite come due tuple, e lui mi da la distanza tra loro
+    #gli do due coordinate, inserite come due tuple, e lui mi dà la distanza tra loro
     #io poi posso sceliere in che distanza prendere il risultato
     time = dist/vel * 60 #minuti
     return time
@@ -35,7 +35,8 @@ class Model:
     def buildGraphPesato(self):
         self._grafo.clear()
         self._grafo.add_nodes_from(self._fermate)
-        self.addEdgesPesati() #Cambia solo come vado ad aggiungere gli archi
+        #self.addEdgesPesati() #Cambia solo come vado ad aggiungere gli archi
+        self.addEdgesPesatiTempi()
 
     def addEdgesPesati(self):
         # versione 1: riutilizzare il principio di funzionamento del metodo addEdges3,
@@ -164,6 +165,19 @@ class Model:
             v = self._idMapFermate[conn.id_stazA]
             self._grafo.add_edge(u, v)
 
+    '''adesso i pesi degli archi non sono più i numeri di linee che collegano due nodi'''
+
+    def addEdgesPesatiTempi(self):
+        '''Questo metodo crea degli archi, in cui il peso è pari al tempo di percorrenza di quell'arco,
+        ottenuto come rapporto fra la distanza fra due stazioni e la velocità di percorrenza'''
+        self._grafo.clear_edges()
+        allEdgesVel = DAO.getAllEdgesVel()
+        for e in allEdgesVel:
+            u = self._idMapFermate[e[0]]
+            v = self._idMapFermate[e[1]]
+            peso = getPesoPercorrenza(u, v, e[2])
+            self._grafo.add_edge(u, v, weight=peso)
+
     def get_numnodi(self):
         return len(self._grafo.nodes())
 
@@ -174,14 +188,3 @@ class Model:
     def fermate(self):
         return self._fermate
 
-    '''adesso i pesi degli archi non sono più i numeri di linee che collegano due nodi'''
-    def addEdgesPesatiTempi(self ):
-        '''Questo metodo crea degli archi, in cui il peso è pari al tempo di percorrenza di quell'arco,
-        ottenuto come rapporto fra la distanza fra due stazioni e la velocità di percorrenza'''
-        self._grafo.clear_edges()
-        allEdgesVel = DAO.getAllEdgesVel()
-        for e in allEdgesVel:
-            u= self._idMapFermate[e[0]]
-            v= self._idMapFermate[e[1]]
-            peso = getPesoPercorrenza(u, v, e[2])
-            self._grafo.add_edge(u,v, weight=peso)
