@@ -91,3 +91,25 @@ class DAO():
         cursor.close()
         conn.close()
         return result
+
+    '''per ogni riga mi vado a prendere la velocità massima direttamente dal dao'''
+    @staticmethod
+    def getAllEdgesVel():
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """select c.id_stazA , c.id_stazA , max(l.velocita) as veloc
+                    from connessione c, linea l
+                    where l.id_linea = c.id_linea 
+                    group by c.id_stazP , c.id_stazA 
+                    order by veloc asc"""
+        cursor.execute(query)
+
+        for row in cursor:
+            result.append((row["id_stazP"], row["id_stazA"], row["veloc"]))
+
+        cursor.close()
+        conn.close()
+        return result

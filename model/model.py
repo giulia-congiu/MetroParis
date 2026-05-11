@@ -1,6 +1,18 @@
+
 from database.DAO import DAO
 import networkx as nx
 from datetime import datetime
+import geopy.distance
+
+'''lo scrivo fuori perchè è un metodo statico, non fa parte della classe!!'''
+def getPesoPercorrenza(u, v, vel):
+    dist = geopy.distance.distance((u.coordX, u.coordY),
+                                   (v.coordX, v.coordY)).km
+    #gli do due coordinate, inserite come due tuple, e lui mi da la distanza tra loro
+    #io poi posso sceliere in che distanza prendere il risultato
+    time = dist/vel * 60 #minuti
+    return time
+
 
 class Model:
     def __init__(self):
@@ -15,6 +27,9 @@ class Model:
             self._idMapFermate[f.id_fermata] = f
             #dato l'id della fermata (chiave primaria della dataclasss (uso quasi sempre quellA)),
             # ritorno l'oggetto fermata corrispondente
+
+    def getShortestPath(self, u, v):
+        return nx.single_source_dijkstra(self._grafo, u, v)
 
     '''VERSIONE 2 CON GRAFO PESATO PER TENER CONTO DEI PERCORSI DOPPI'''
     def buildGraphPesato(self):
@@ -158,3 +173,15 @@ class Model:
     @property
     def fermate(self):
         return self._fermate
+
+    '''adesso i pesi degli archi non sono più i numeri di linee che collegano due nodi'''
+    def addEdgesPesatiTempi(self ):
+        '''Questo metodo crea degli archi, in cui il peso è pari al tempo di percorrenza di quell'arco,
+        ottenuto come rapporto fra la distanza fra due stazioni e la velocità di percorrenza'''
+        self._grafo.clear_edges()
+        allEdgesVel = DAO.getAllEdgesVel()
+        for e in allEdgesVel:
+            u= self._idMapFermate[e[0]]
+            v= self._idMapFermate[e[1]]
+            peso = getPesoPercorrenza(u, v, e[2])
+            self._grafo.add_edge(u,v, weight=peso)
