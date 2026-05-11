@@ -37,7 +37,9 @@ class Controller:
     def handleTrovaPercorso(self, e):
         if self._fermataPartenza is None or self._fermataArrivo is None:
             self._view.lst_result.controls.clear()
-            self._view.lst_result.controls.append(ft.Text("Attenzione necessario selezionare fermata di partenza e di arrivo", color=))
+            self._view.lst_result.controls.append((ft.Text("Attenzione, necesario"
+                      "selezionare fermate di "
+                      "partenza ed arrivo.", color="red")))
             self._view.update_page()
             return
 
