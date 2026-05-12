@@ -81,7 +81,7 @@ class DAO():
                    FROM connessione c
                    group by id_stazP, id_stazA
                    order by peso desc"""
-        #conta le righe uguali per una coopia, ovvero quanti archi esistono da u a v
+        #conta le righe uguali per una coppia, ovvero quanti archi esistono da u a v
         cursor.execute(query)
 
         #creo semplicemente una lista di tuple (stazP, stazA, peso) invece che un oggetto che dovrei creare
@@ -100,7 +100,7 @@ class DAO():
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select c.id_stazA , c.id_stazA , max(l.velocita) as v
+        query = """select c.id_stazP , c.id_stazA , max(l.velocita) as v
                     from connessione c, linea l
                     where l.id_linea = c.id_linea 
                     group by c.id_stazP , c.id_stazA 
